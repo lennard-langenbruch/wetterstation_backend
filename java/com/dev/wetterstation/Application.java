@@ -31,15 +31,13 @@ public class Application {
     
     @Autowired
     private EventRepository repository;
-    
-    private final List<String> messages = new CopyOnWriteArrayList<>();
-    
-	
+    	
     public static void main(String[] args) {
         SpringApplication.run(Application.class, args);
     }
-
-    @PostConstruct // call after construct/create bean
+    
+    /** Verbindung zum MQTT Broker > "Subscribe" Sensordaten Topic > Speichern der Sensordaten zu H2 Datenbank bei Event */
+    @PostConstruct
     public void mqtt() {
         try {
             String url = "ssl://"+broker;
@@ -58,7 +56,7 @@ public class Application {
             client.subscribe(topic, (t, message) -> {
                 String payload = new String(message.getPayload());
                 System.out.println("Received on " + t + ": " + payload);
-                messages.add(payload);
+
                 
                 System.out.println("test");
                 try {
@@ -79,10 +77,5 @@ public class Application {
         } catch (MqttException e) {
             e.printStackTrace();
         }
-    }
-
-    @GetMapping("/messages")
-    public List<String> getMessages() {
-        return messages;
     }
 }
